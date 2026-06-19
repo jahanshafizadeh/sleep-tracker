@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sleep Tracker</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: #0f0f1a;
+      color: #e2e2f0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 40px 16px;
+    }
+
+    h1 {
+      font-size: 2rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+      background: linear-gradient(135deg, #a78bfa, #60a5fa);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .subtitle {
+      color: #6b6b8a;
+      margin-bottom: 36px;
+      font-size: 0.95rem;
+    }
+
+    .card {
+      background: #1a1a2e;
+      border: 1px solid #2a2a45;
+      border-radius: 16px;
+      padding: 28px;
+      width: 100%;
+      max-width: 480px;
+      margin-bottom: 24px;
+    }
+
+    .card h2 {
+      font-size: 1rem;
+      font-weight: 600;
+      color: #a0a0c0;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 20px;
+    }
+
+    label {
+      display: block;
+      font-size: 0.85rem;
+      color: #8080a0;
+      margin-bottom: 6px;
+      margin-top: 16px;
+    }
+
+    label:first-of-type { margin-top: 0; }
+
+    input[type="date"],
+    input[type="number"] {
+      width: 100%;
+      background: #0f0f1a;
+      border: 1px solid #2a2a45;
+      border-radius: 8px;
+      color: #e2e2f0;
+      font-size: 1rem;
+      padding: 10px 14px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    input[type="date"]:focus,
+    input[type="number"]:focus {
+      border-color: #7c3aed;
+    }
+
+    /* Quality slider */
+    .quality-display {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-top: 8px;
+    }
+
+    input[type="range"] {
+      flex: 1;
+      -webkit-appearance: none;
+      height: 6px;
+      border-radius: 3px;
+      background: #2a2a45;
+      outline: none;
+    }
+
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: #7c3aed;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    input[type="range"]::-webkit-slider-thumb:hover {
+      background: #9f5ffa;
+    }
+
+    .quality-value {
+      font-size: 1.5rem;
+      font-weight: 700;
+      min-width: 40px;
+      text-align: center;
+      color: #a78bfa;
+    }
+
+    .quality-label {
+      font-size: 0.8rem;
+      color: #6b6b8a;
+      text-align: center;
+      margin-top: 4px;
+    }
+
+    textarea {
+      width: 100%;
+      background: #0f0f1a;
+      border: 1px solid #2a2a45;
+      border-radius: 8px;
+      color: #e2e2f0;
+      font-size: 0.9rem;
+      padding: 10px 14px;
+      resize: vertical;
+      min-height: 72px;
+      outline: none;
+      font-family: inherit;
+      transition: border-color 0.2s;
+    }
+
+    textarea:focus { border-color: #7c3aed; }
+
+    button.primary {
+      width: 100%;
+      margin-top: 20px;
+      padding: 12px;
+      background: linear-gradient(135deg, #7c3aed, #3b82f6);
+      border: none;
+      border-radius: 10px;
+      color: #fff;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity 0.2s;
+    }
+
+    button.primary:hover { opacity: 0.88; }
+
+    /* Stats row */
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-bottom: 24px;
+      width: 100%;
+      max-width: 480px;
+    }
+
+    .stat-box {
+      background: #1a1a2e;
+      border: 1px solid #2a2a45;
+      border-radius: 12px;
+      padding: 16px;
+      text-align: center;
+    }
+
+    .stat-box .val {
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: #a78bfa;
+    }
+
+    .stat-box .lbl {
+      font-size: 0.75rem;
+      color: #6b6b8a;
+      margin-top: 4px;
+    }
+
+    /* History */
+    .history-card {
+      width: 100%;
+      max-width: 480px;
+    }
+
+    .history-card h2 {
+      font-size: 1rem;
+      font-weight: 600;
+      color: #a0a0c0;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 16px;
+    }
+
+    .entry {
+      background: #1a1a2e;
+      border: 1px solid #2a2a45;
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .entry-date {
+      font-size: 0.8rem;
+      color: #6b6b8a;
+      min-width: 80px;
+    }
+
+    .entry-hours {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: #60a5fa;
+      min-width: 60px;
+    }
+
+    .entry-quality {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex: 1;
+    }
+
+    .quality-bar-bg {
+      flex: 1;
+      height: 6px;
+      background: #2a2a45;
+      border-radius: 3px;
+      overflow: hidden;
+    }
+
+    .quality-bar-fill {
+      height: 100%;
+      border-radius: 3px;
+      background: linear-gradient(90deg, #7c3aed, #60a5fa);
+    }
+
+    .entry-quality-num {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: #a78bfa;
+      min-width: 28px;
+      text-align: right;
+    }
+
+    .entry-note {
+      font-size: 0.8rem;
+      color: #6b6b8a;
+      margin-top: 6px;
+      font-style: italic;
+    }
+
+    .entry-inner { flex: 1; }
+
+    .delete-btn {
+      background: none;
+      border: none;
+      color: #3a3a5a;
+      cursor: pointer;
+      font-size: 1rem;
+      padding: 4px;
+      transition: color 0.2s;
+    }
+
+    .delete-btn:hover { color: #ef4444; }
+
+    .empty {
+      text-align: center;
+      color: #3a3a5a;
+      padding: 32px 0;
+      font-size: 0.95rem;
+    }
+
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(80px);
+      background: #16a34a;
+      color: #fff;
+      padding: 12px 24px;
+      border-radius: 999px;
+      font-size: 0.9rem;
+      font-weight: 500;
+      transition: transform 0.3s ease;
+      z-index: 999;
+    }
+
+    .toast.show { transform: translateX(-50%) translateY(0); }
+  </style>
+</head>
+<body>
+
+  <h1>🌙 Sleep Tracker</h1>
+  <p class="subtitle">Log your sleep, spot your patterns.</p>
+
+  <!-- Stats -->
+  <div class="stats">
+    <div class="stat-box">
+      <div class="val" id="stat-entries">0</div>
+      <div class="lbl">Entries</div>
+    </div>
+    <div class="stat-box">
+      <div class="val" id="stat-avg-hours">—</div>
+      <div class="lbl">Avg Hours</div>
+    </div>
+    <div class="stat-box">
+      <div class="val" id="stat-avg-quality">—</div>
+      <div class="lbl">Avg Quality</div>
+    </div>
+  </div>
+
+  <!-- Log form -->
+  <div class="card">
+    <h2>Log Sleep</h2>
+
+    <label for="date">Date</label>
+    <input type="date" id="date" />
+
+    <label for="hours">Hours slept</label>
+    <input type="number" id="hours" min="0" max="24" step="0.5" placeholder="e.g. 7.5" />
+
+    <label>Sleep quality</label>
+    <div class="quality-display">
+      <input type="range" id="quality" min="1" max="10" value="7" />
+      <div class="quality-value" id="quality-val">7</div>
+    </div>
+    <div class="quality-label" id="quality-desc">Good</div>
+
+    <label for="notes">Notes (optional)</label>
+    <textarea id="notes" placeholder="How did you feel? Any disruptions?"></textarea>
+
+    <button class="primary" onclick="logSleep()">Save Entry</button>
+  </div>
+
+  <!-- History -->
+  <div class="history-card">
+    <h2>History</h2>
+    <div id="history-list"></div>
+  </div>
+
+  <div class="toast" id="toast">Entry saved!</div>
+
+  <script>
+    const QUALITY_LABELS = {
+      1: 'Terrible', 2: 'Very Poor', 3: 'Poor', 4: 'Below Average',
+      5: 'Average', 6: 'Decent', 7: 'Good', 8: 'Very Good',
+      9: 'Excellent', 10: 'Perfect'
+    };
+
+    // Set today's date as default
+    const dateInput = document.getElementById('date');
+    dateInput.value = new Date().toISOString().split('T')[0];
+
+    // Quality slider live update
+    const qualityInput = document.getElementById('quality');
+    const qualityVal = document.getElementById('quality-val');
+    const qualityDesc = document.getElementById('quality-desc');
+
+    qualityInput.addEventListener('input', () => {
+      const v = qualityInput.value;
+      qualityVal.textContent = v;
+      qualityDesc.textContent = QUALITY_LABELS[v];
+    });
+
+    function getEntries() {
+      return JSON.parse(localStorage.getItem('sleep-entries') || '[]');
+    }
+
+    function saveEntries(entries) {
+      localStorage.setItem('sleep-entries', JSON.stringify(entries));
+    }
+
+    function logSleep() {
+      const date = document.getElementById('date').value;
+      const hours = parseFloat(document.getElementById('hours').value);
+      const quality = parseInt(qualityInput.value);
+      const notes = document.getElementById('notes').value.trim();
+
+      if (!date) { alert('Please select a date.'); return; }
+      if (isNaN(hours) || hours < 0 || hours > 24) {
+        alert('Please enter valid hours (0–24).');
+        return;
+      }
+
+      const entries = getEntries();
+      entries.unshift({ id: Date.now(), date, hours, quality, notes });
+      saveEntries(entries);
+
+      // Reset form
+      document.getElementById('hours').value = '';
+      document.getElementById('notes').value = '';
+      qualityInput.value = 7;
+      qualityVal.textContent = 7;
+      qualityDesc.textContent = QUALITY_LABELS[7];
+      dateInput.value = new Date().toISOString().split('T')[0];
+
+      showToast();
+      render();
+    }
+
+    function deleteEntry(id) {
+      const entries = getEntries().filter(e => e.id !== id);
+      saveEntries(entries);
+      render();
+    }
+
+    function showToast() {
+      const t = document.getElementById('toast');
+      t.classList.add('show');
+      setTimeout(() => t.classList.remove('show'), 2500);
+    }
+
+    function formatDate(str) {
+      const [y, m, d] = str.split('-');
+      const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+      return `${months[+m-1]} ${+d}, ${y}`;
+    }
+
+    function render() {
+      const entries = getEntries();
+
+      // Stats
+      document.getElementById('stat-entries').textContent = entries.length;
+      if (entries.length > 0) {
+        const avgH = entries.reduce((s, e) => s + e.hours, 0) / entries.length;
+        const avgQ = entries.reduce((s, e) => s + e.quality, 0) / entries.length;
+        document.getElementById('stat-avg-hours').textContent = avgH.toFixed(1);
+        document.getElementById('stat-avg-quality').textContent = avgQ.toFixed(1);
+      } else {
+        document.getElementById('stat-avg-hours').textContent = '—';
+        document.getElementById('stat-avg-quality').textContent = '—';
+      }
+
+      // History list
+      const list = document.getElementById('history-list');
+      if (entries.length === 0) {
+        list.innerHTML = '<p class="empty">No entries yet. Log your first night above.</p>';
+        return;
+      }
+
+      list.innerHTML = entries.map(e => `
+        <div class="entry">
+          <div class="entry-inner">
+            <div style="display:flex;align-items:center;gap:12px;">
+              <span class="entry-date">${formatDate(e.date)}</span>
+              <span class="entry-hours">${e.hours}h</span>
+              <div class="entry-quality">
+                <div class="quality-bar-bg">
+                  <div class="quality-bar-fill" style="width:${e.quality * 10}%"></div>
+                </div>
+                <span class="entry-quality-num">${e.quality}/10</span>
+              </div>
+            </div>
+            ${e.notes ? `<div class="entry-note">${escapeHtml(e.notes)}</div>` : ''}
+          </div>
+          <button class="delete-btn" onclick="deleteEntry(${e.id})" title="Delete">✕</button>
+        </div>
+      `).join('');
+    }
+
+    function escapeHtml(str) {
+      return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    }
+
+    render();
+  </script>
+</body>
+</html>
