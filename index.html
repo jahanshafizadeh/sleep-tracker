@@ -63,7 +63,8 @@
     label:first-of-type { margin-top: 0; }
 
     input[type="date"],
-    input[type="number"] {
+    input[type="number"],
+    input[type="text"] {
       width: 100%;
       background: #0f0f1a;
       border: 1px solid #2a2a45;
@@ -76,7 +77,8 @@
     }
 
     input[type="date"]:focus,
-    input[type="number"]:focus {
+    input[type="number"]:focus,
+    input[type="text"]:focus {
       border-color: #7c3aed;
     }
 
@@ -156,36 +158,12 @@
       transition: opacity 0.2s;
     }
 
-    button.primary:hover { opacity: 0.88; }
-
-    .stats {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 12px;
-      margin-bottom: 24px;
-      width: 100%;
-      max-width: 480px;
+    button.primary:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
     }
 
-    .stat-box {
-      background: #1a1a2e;
-      border: 1px solid #2a2a45;
-      border-radius: 12px;
-      padding: 16px;
-      text-align: center;
-    }
-
-    .stat-box .val {
-      font-size: 1.6rem;
-      font-weight: 700;
-      color: #a78bfa;
-    }
-
-    .stat-box .lbl {
-      font-size: 0.75rem;
-      color: #6b6b8a;
-      margin-top: 4px;
-    }
+    button.primary:hover:not(:disabled) { opacity: 0.88; }
 
     .history-card {
       width: 100%;
@@ -207,9 +185,22 @@
       border-radius: 12px;
       padding: 16px;
       margin-bottom: 10px;
+    }
+
+    .entry-row {
       display: flex;
       align-items: center;
-      gap: 16px;
+      gap: 12px;
+    }
+
+    .entry-participant {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #a78bfa;
+      min-width: 80px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
     .entry-date {
@@ -222,7 +213,7 @@
       font-size: 1.1rem;
       font-weight: 700;
       color: #60a5fa;
-      min-width: 60px;
+      min-width: 48px;
     }
 
     .entry-quality {
@@ -250,7 +241,7 @@
       font-size: 0.9rem;
       font-weight: 600;
       color: #a78bfa;
-      min-width: 28px;
+      min-width: 32px;
       text-align: right;
     }
 
@@ -260,20 +251,6 @@
       margin-top: 6px;
       font-style: italic;
     }
-
-    .entry-inner { flex: 1; }
-
-    .delete-btn {
-      background: none;
-      border: none;
-      color: #3a3a5a;
-      cursor: pointer;
-      font-size: 1rem;
-      padding: 4px;
-      transition: color 0.2s;
-    }
-
-    .delete-btn:hover { color: #ef4444; }
 
     .empty {
       text-align: center;
@@ -287,17 +264,30 @@
       bottom: 24px;
       left: 50%;
       transform: translateX(-50%) translateY(80px);
-      background: #16a34a;
-      color: #fff;
       padding: 12px 24px;
       border-radius: 999px;
       font-size: 0.9rem;
       font-weight: 500;
       transition: transform 0.3s ease;
       z-index: 999;
+      background: #16a34a;
+      color: #fff;
     }
 
+    .toast.error { background: #dc2626; }
     .toast.show { transform: translateX(-50%) translateY(0); }
+
+    .config-notice {
+      background: #2a1a00;
+      border: 1px solid #7c4a00;
+      border-radius: 10px;
+      padding: 14px 16px;
+      font-size: 0.85rem;
+      color: #fbbf24;
+      margin-bottom: 20px;
+      width: 100%;
+      max-width: 480px;
+    }
   </style>
 </head>
 <body>
@@ -305,23 +295,15 @@
   <h1>🌙 Sleep Tracker</h1>
   <p class="subtitle">Log your sleep, spot your patterns.</p>
 
-  <div class="stats">
-    <div class="stat-box">
-      <div class="val" id="stat-entries">0</div>
-      <div class="lbl">Entries</div>
-    </div>
-    <div class="stat-box">
-      <div class="val" id="stat-avg-hours">—</div>
-      <div class="lbl">Avg Hours</div>
-    </div>
-    <div class="stat-box">
-      <div class="val" id="stat-avg-quality">—</div>
-      <div class="lbl">Avg Refreshed</div>
-    </div>
+  <div class="config-notice" id="config-notice" style="display:none">
+    ⚠️ Google Sheets not connected yet. Entries are saved locally only.
   </div>
 
   <div class="card">
     <h2>Log Sleep</h2>
+
+    <label for="participant">Your name or study ID</label>
+    <input type="text" id="participant" placeholder="e.g. Jahan or P-042" />
 
     <label for="date">Date</label>
     <input type="date" id="date" />
@@ -339,17 +321,22 @@
     <label for="notes">Notes (optional)</label>
     <textarea id="notes" placeholder="How did you feel? Any disruptions?"></textarea>
 
-    <button class="primary" onclick="logSleep()">Save Entry</button>
+    <button class="primary" id="save-btn" onclick="logSleep()">Save Entry</button>
   </div>
 
   <div class="history-card">
-    <h2>History</h2>
+    <h2>Your History</h2>
     <div id="history-list"></div>
   </div>
 
-  <div class="toast" id="toast">Entry saved!</div>
+  <div class="toast" id="toast"></div>
 
   <script>
+    // ─── CONFIGURATION ───────────────────────────────────────────────────────────
+    // Paste your Google Apps Script web app URL here after deployment.
+    const SCRIPT_URL = 'YOUR_SCRIPT_URL';
+    // ────────────────────────────────────────────────────────────────────────────
+
     const QUALITY_LABELS = {
       1: 'Exhausted', 2: 'Very Groggy', 3: 'Groggy', 4: 'Somewhat Tired',
       5: 'Neutral', 6: 'Decent', 7: 'Good', 8: 'Very Refreshed',
@@ -359,10 +346,13 @@
     const dateInput = document.getElementById('date');
     dateInput.value = new Date().toISOString().split('T')[0];
 
+    if (SCRIPT_URL === 'YOUR_SCRIPT_URL') {
+      document.getElementById('config-notice').style.display = 'block';
+    }
+
     const qualityInput = document.getElementById('quality');
     const qualityVal = document.getElementById('quality-val');
     const qualityDesc = document.getElementById('quality-desc');
-
     qualityInput.addEventListener('input', () => {
       const v = qualityInput.value;
       qualityVal.textContent = v;
@@ -373,25 +363,49 @@
       return JSON.parse(localStorage.getItem('sleep-entries') || '[]');
     }
 
-    function saveEntries(entries) {
+    function saveLocal(entry) {
+      const entries = getEntries();
+      entries.unshift(entry);
       localStorage.setItem('sleep-entries', JSON.stringify(entries));
     }
 
-    function logSleep() {
-      const date = document.getElementById('date').value;
+    async function logSleep() {
+      const participant = document.getElementById('participant').value.trim();
+      const date = dateInput.value;
       const hours = parseFloat(document.getElementById('hours').value);
       const quality = parseInt(qualityInput.value);
       const notes = document.getElementById('notes').value.trim();
 
+      if (!participant) { alert('Please enter your name or study ID.'); return; }
       if (!date) { alert('Please select a date.'); return; }
       if (isNaN(hours) || hours < 0 || hours > 24) {
         alert('Please enter valid hours (0–24).');
         return;
       }
 
-      const entries = getEntries();
-      entries.unshift({ id: Date.now(), date, hours, quality, notes });
-      saveEntries(entries);
+      const entry = { id: Date.now(), participant, date, hours, quality, notes };
+
+      const btn = document.getElementById('save-btn');
+      btn.disabled = true;
+      btn.textContent = 'Saving…';
+
+      saveLocal(entry);
+
+      if (SCRIPT_URL !== 'YOUR_SCRIPT_URL') {
+        try {
+          await fetch(SCRIPT_URL, {
+            method: 'POST',
+            mode: 'no-cors',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(entry)
+          });
+          showToast('Entry saved!', false);
+        } catch (err) {
+          showToast('Saved locally — cloud sync failed.', true);
+        }
+      } else {
+        showToast('Entry saved locally.', false);
+      }
 
       document.getElementById('hours').value = '';
       document.getElementById('notes').value = '';
@@ -399,21 +413,17 @@
       qualityVal.textContent = 7;
       qualityDesc.textContent = QUALITY_LABELS[7];
       dateInput.value = new Date().toISOString().split('T')[0];
+      btn.disabled = false;
+      btn.textContent = 'Save Entry';
 
-      showToast();
       render();
     }
 
-    function deleteEntry(id) {
-      const entries = getEntries().filter(e => e.id !== id);
-      saveEntries(entries);
-      render();
-    }
-
-    function showToast() {
+    function showToast(msg, isError) {
       const t = document.getElementById('toast');
-      t.classList.add('show');
-      setTimeout(() => t.classList.remove('show'), 2500);
+      t.textContent = msg;
+      t.className = 'toast' + (isError ? ' error' : '') + ' show';
+      setTimeout(() => t.classList.remove('show'), 2800);
     }
 
     function formatDate(str) {
@@ -424,19 +434,8 @@
 
     function render() {
       const entries = getEntries();
-
-      document.getElementById('stat-entries').textContent = entries.length;
-      if (entries.length > 0) {
-        const avgH = entries.reduce((s, e) => s + e.hours, 0) / entries.length;
-        const avgQ = entries.reduce((s, e) => s + e.quality, 0) / entries.length;
-        document.getElementById('stat-avg-hours').textContent = avgH.toFixed(1);
-        document.getElementById('stat-avg-quality').textContent = avgQ.toFixed(1);
-      } else {
-        document.getElementById('stat-avg-hours').textContent = '—';
-        document.getElementById('stat-avg-quality').textContent = '—';
-      }
-
       const list = document.getElementById('history-list');
+
       if (entries.length === 0) {
         list.innerHTML = '<p class="empty">No entries yet. Log your first night above.</p>';
         return;
@@ -444,20 +443,18 @@
 
       list.innerHTML = entries.map(e => `
         <div class="entry">
-          <div class="entry-inner">
-            <div style="display:flex;align-items:center;gap:12px;">
-              <span class="entry-date">${formatDate(e.date)}</span>
-              <span class="entry-hours">${e.hours}h</span>
-              <div class="entry-quality">
-                <div class="quality-bar-bg">
-                  <div class="quality-bar-fill" style="width:${e.quality * 10}%"></div>
-                </div>
-                <span class="entry-quality-num">${e.quality}/10</span>
+          <div class="entry-row">
+            <span class="entry-participant">${escapeHtml(e.participant)}</span>
+            <span class="entry-date">${formatDate(e.date)}</span>
+            <span class="entry-hours">${e.hours}h</span>
+            <div class="entry-quality">
+              <div class="quality-bar-bg">
+                <div class="quality-bar-fill" style="width:${e.quality * 10}%"></div>
               </div>
+              <span class="entry-quality-num">${e.quality}/10</span>
             </div>
-            ${e.notes ? `<div class="entry-note">${escapeHtml(e.notes)}</div>` : ''}
           </div>
-          <button class="delete-btn" onclick="deleteEntry(${e.id})" title="Delete">✕</button>
+          ${e.notes ? `<div class="entry-note">${escapeHtml(e.notes)}</div>` : ''}
         </div>
       `).join('');
     }
