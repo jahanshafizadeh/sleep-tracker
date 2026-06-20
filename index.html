@@ -80,7 +80,6 @@
       border-color: #7c3aed;
     }
 
-    /* Quality slider */
     .quality-display {
       display: flex;
       align-items: center;
@@ -159,7 +158,6 @@
 
     button.primary:hover { opacity: 0.88; }
 
-    /* Stats row */
     .stats {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
@@ -189,7 +187,6 @@
       margin-top: 4px;
     }
 
-    /* History */
     .history-card {
       width: 100%;
       max-width: 480px;
@@ -308,7 +305,6 @@
   <h1>🌙 Sleep Tracker</h1>
   <p class="subtitle">Log your sleep, spot your patterns.</p>
 
-  <!-- Stats -->
   <div class="stats">
     <div class="stat-box">
       <div class="val" id="stat-entries">0</div>
@@ -320,11 +316,10 @@
     </div>
     <div class="stat-box">
       <div class="val" id="stat-avg-quality">—</div>
-      <div class="lbl">Avg Quality</div>
+      <div class="lbl">Avg Refreshed</div>
     </div>
   </div>
 
-  <!-- Log form -->
   <div class="card">
     <h2>Log Sleep</h2>
 
@@ -334,7 +329,7 @@
     <label for="hours">Hours slept</label>
     <input type="number" id="hours" min="0" max="24" step="0.5" placeholder="e.g. 7.5" />
 
-    <label>Sleep quality</label>
+    <label>How refreshed do you feel?</label>
     <div class="quality-display">
       <input type="range" id="quality" min="1" max="10" value="7" />
       <div class="quality-value" id="quality-val">7</div>
@@ -347,7 +342,6 @@
     <button class="primary" onclick="logSleep()">Save Entry</button>
   </div>
 
-  <!-- History -->
   <div class="history-card">
     <h2>History</h2>
     <div id="history-list"></div>
@@ -357,16 +351,14 @@
 
   <script>
     const QUALITY_LABELS = {
-      1: 'Terrible', 2: 'Very Poor', 3: 'Poor', 4: 'Below Average',
-      5: 'Average', 6: 'Decent', 7: 'Good', 8: 'Very Good',
-      9: 'Excellent', 10: 'Perfect'
+      1: 'Exhausted', 2: 'Very Groggy', 3: 'Groggy', 4: 'Somewhat Tired',
+      5: 'Neutral', 6: 'Decent', 7: 'Good', 8: 'Very Refreshed',
+      9: 'Excellent', 10: 'Fully Refreshed'
     };
 
-    // Set today's date as default
     const dateInput = document.getElementById('date');
     dateInput.value = new Date().toISOString().split('T')[0];
 
-    // Quality slider live update
     const qualityInput = document.getElementById('quality');
     const qualityVal = document.getElementById('quality-val');
     const qualityDesc = document.getElementById('quality-desc');
@@ -401,7 +393,6 @@
       entries.unshift({ id: Date.now(), date, hours, quality, notes });
       saveEntries(entries);
 
-      // Reset form
       document.getElementById('hours').value = '';
       document.getElementById('notes').value = '';
       qualityInput.value = 7;
@@ -434,7 +425,6 @@
     function render() {
       const entries = getEntries();
 
-      // Stats
       document.getElementById('stat-entries').textContent = entries.length;
       if (entries.length > 0) {
         const avgH = entries.reduce((s, e) => s + e.hours, 0) / entries.length;
@@ -446,7 +436,6 @@
         document.getElementById('stat-avg-quality').textContent = '—';
       }
 
-      // History list
       const list = document.getElementById('history-list');
       if (entries.length === 0) {
         list.innerHTML = '<p class="empty">No entries yet. Log your first night above.</p>';
