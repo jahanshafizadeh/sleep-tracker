@@ -359,6 +359,9 @@
       qualityDesc.textContent = QUALITY_LABELS[v];
     });
 
+    // Re-render history when name changes so participants only see their own data
+    document.getElementById('participant').addEventListener('input', () => render());
+
     function getEntries() {
       return JSON.parse(localStorage.getItem('sleep-entries') || '[]');
     }
@@ -433,8 +436,15 @@
     }
 
     function render() {
-      const entries = getEntries();
+      const name = document.getElementById('participant').value.trim().toLowerCase();
+      const all = getEntries();
+      const entries = name ? all.filter(e => e.participant.toLowerCase() === name) : [];
       const list = document.getElementById('history-list');
+
+      if (!name) {
+        list.innerHTML = '<p class="empty">Enter your name above to see your history.</p>';
+        return;
+      }
 
       if (entries.length === 0) {
         list.innerHTML = '<p class="empty">No entries yet. Log your first night above.</p>';
