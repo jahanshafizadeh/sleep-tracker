@@ -15,7 +15,11 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      padding: 40px 16px;
+      padding: 32px 16px;
+    }
+
+    @media (max-width: 480px) {
+      body { padding: 20px 12px; }
     }
 
     h1 {
@@ -28,9 +32,9 @@
     }
 
     .subtitle {
-      color: #6b6b8a;
+      color: #9898bc;
       margin-bottom: 36px;
-      font-size: 0.95rem;
+      font-size: 1rem;
     }
 
     .card {
@@ -54,8 +58,8 @@
 
     label {
       display: block;
-      font-size: 0.85rem;
-      color: #8080a0;
+      font-size: 0.9rem;
+      color: #b0b0d0;
       margin-bottom: 6px;
       margin-top: 16px;
     }
@@ -70,16 +74,20 @@
       border: 1px solid #2a2a45;
       border-radius: 8px;
       color: #e2e2f0;
-      font-size: 1rem;
+      font-size: 16px; /* prevent iOS zoom on focus */
+      min-height: 44px; /* WCAG touch target */
       padding: 10px 14px;
       outline: none;
       transition: border-color 0.2s;
+      -webkit-appearance: none;
     }
 
     input[type="date"]:focus,
     input[type="number"]:focus,
     input[type="text"]:focus {
-      border-color: #7c3aed;
+      border-color: #a78bfa;
+      outline: 2px solid #a78bfa;
+      outline-offset: 2px;
     }
 
     .quality-display {
@@ -100,8 +108,8 @@
 
     input[type="range"]::-webkit-slider-thumb {
       -webkit-appearance: none;
-      width: 20px;
-      height: 20px;
+      width: 28px;
+      height: 28px;
       border-radius: 50%;
       background: #7c3aed;
       cursor: pointer;
@@ -121,8 +129,8 @@
     }
 
     .quality-label {
-      font-size: 0.8rem;
-      color: #6b6b8a;
+      font-size: 0.9rem;
+      color: #9898bc;
       text-align: center;
       margin-top: 4px;
     }
@@ -133,7 +141,7 @@
       border: 1px solid #2a2a45;
       border-radius: 8px;
       color: #e2e2f0;
-      font-size: 0.9rem;
+      font-size: 1rem;
       padding: 10px 14px;
       resize: vertical;
       min-height: 72px;
@@ -142,12 +150,17 @@
       transition: border-color 0.2s;
     }
 
-    textarea:focus { border-color: #7c3aed; }
+    textarea:focus {
+      border-color: #a78bfa;
+      outline: 2px solid #a78bfa;
+      outline-offset: 2px;
+    }
 
     button.primary {
       width: 100%;
       margin-top: 20px;
-      padding: 12px;
+      padding: 14px;
+      min-height: 44px; /* WCAG touch target */
       background: linear-gradient(135deg, #7c3aed, #3b82f6);
       border: none;
       border-radius: 10px;
@@ -156,6 +169,7 @@
       font-weight: 600;
       cursor: pointer;
       transition: opacity 0.2s;
+      -webkit-tap-highlight-color: transparent;
     }
 
     button.primary:disabled {
@@ -164,6 +178,11 @@
     }
 
     button.primary:hover:not(:disabled) { opacity: 0.88; }
+
+    button.primary:focus-visible {
+      outline: 3px solid #a78bfa;
+      outline-offset: 3px;
+    }
 
     .history-card {
       width: 100%;
@@ -191,10 +210,17 @@
       display: flex;
       align-items: center;
       gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    @media (max-width: 400px) {
+      .entry-row { gap: 8px; }
+      .entry-date { min-width: auto; }
+      .entry-participant { min-width: auto; }
     }
 
     .entry-participant {
-      font-size: 0.85rem;
+      font-size: 0.9rem;
       font-weight: 600;
       color: #a78bfa;
       min-width: 80px;
@@ -204,8 +230,8 @@
     }
 
     .entry-date {
-      font-size: 0.8rem;
-      color: #6b6b8a;
+      font-size: 0.9rem;
+      color: #9898bc;
       min-width: 80px;
     }
 
@@ -246,17 +272,17 @@
     }
 
     .entry-note {
-      font-size: 0.8rem;
-      color: #6b6b8a;
+      font-size: 0.9rem;
+      color: #9898bc;
       margin-top: 6px;
       font-style: italic;
     }
 
     .empty {
       text-align: center;
-      color: #3a3a5a;
+      color: #9898bc;
       padding: 32px 0;
-      font-size: 0.95rem;
+      font-size: 1rem;
     }
 
     .toast {
@@ -266,7 +292,7 @@
       transform: translateX(-50%) translateY(80px);
       padding: 12px 24px;
       border-radius: 999px;
-      font-size: 0.9rem;
+      font-size: 1rem;
       font-weight: 500;
       transition: transform 0.3s ease;
       z-index: 999;
@@ -313,7 +339,7 @@
 
     <label>How refreshed do you feel?</label>
     <div class="quality-display">
-      <input type="range" id="quality" min="1" max="10" value="7" />
+      <input type="range" id="quality" min="1" max="10" value="7" aria-label="How refreshed do you feel, 1 to 10" />
       <div class="quality-value" id="quality-val">7</div>
     </div>
     <div class="quality-label" id="quality-desc">Good</div>
