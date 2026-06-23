@@ -330,7 +330,7 @@
   <div class="card">
     <h2>Log Sleep</h2>
 
-    <label for="participant">Name</label>
+    <label for="participant">ID</label>
     <input type="text" id="participant" placeholder="e.g. Jane Smith" />
 
     <label for="date">Date</label>
@@ -341,7 +341,7 @@
 
     <label>How refreshed do you feel?</label>
     <div class="quality-display">
-      <input type="range" id="quality" min="1" max="10" step="0.1" value="7" aria-label="How refreshed do you feel, 1 to 10" />
+      <input type="range" id="quality" min="0" max="10" step="0.1" value="7" aria-label="How refreshed do you feel, 0 to 10" />
       <div class="quality-value" id="quality-val">7</div>
     </div>
     <div class="quality-label" id="quality-desc">Good</div>
@@ -366,7 +366,7 @@
     // ---------------------
 
     const QUALITY_LABELS = {
-      1: 'Exhausted', 2: 'Very Groggy', 3: 'Groggy', 4: 'Somewhat Tired',
+      0: 'No Sleep', 1: 'Exhausted', 2: 'Very Groggy', 3: 'Groggy', 4: 'Somewhat Tired',
       5: 'Neutral', 6: 'Decent', 7: 'Good', 8: 'Very Refreshed',
       9: 'Excellent', 10: 'Fully Refreshed'
     };
